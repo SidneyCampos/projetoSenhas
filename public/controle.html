@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Controle Recepção</title>
+    <style>
+        /* Estilo escuro para não cansar a vista */
+        body {
+            margin: 0;
+            font-family: sans-serif;
+            background-color: #222;
+            color: white;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Área de Toque Principal */
+        #zona-toque {
+            flex: 1;
+            /* Ocupa todo o espaço disponível */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #0056b3, #004494);
+            cursor: pointer;
+            user-select: none;
+            /* Impede selecionar texto */
+            -webkit-tap-highlight-color: transparent;
+            /* Remove piscada azul no mobile */
+        }
+
+        /* Efeito visual ao clicar */
+        #zona-toque:active {
+            opacity: 0.9;
+            transform: scale(0.98);
+        }
+
+        .texto-grande {
+            font-size: 80px;
+            font-weight: bold;
+        }
+
+        .instrucao {
+            margin-top: 10px;
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        /* Barra de Ferramentas Inferior */
+        .barra-opcoes {
+            height: 60px;
+            background-color: #111;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-top: 1px solid #444;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            background: #444;
+            color: white;
+        }
+
+        /* Menu de Opções (Modal) */
+        #modal-opcoes {
+            display: none;
+            /* Começa escondido */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        input {
+            font-size: 20px;
+            padding: 10px;
+            text-align: center;
+            width: 100px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Área Gigante de Toque -->
+    <div id="zona-toque">
+        <div id="num-tela" class="texto-grande">---</div>
+        <div class="instrucao">1 Toque: Próximo | 2 Toques: Voltar</div>
+    </div>
+
+    <!-- Botão Pequeno Embaixo -->
+    <div class="barra-opcoes">
+        <button onclick="abrirModal()">⚙️ Opções</button>
+    </div>
+
+    <!-- Modal de Configuração -->
+    <div id="modal-opcoes">
+        <h3>Ajuste Manual</h3>
+        <input type="number" id="input-manual" placeholder="123">
+        <button onclick="enviarComando('definir')" style="background:#0056b3">Definir Número</button>
+        <br>
+        <button onclick="enviarComando('reset')" style="background:#b30000">Zerar Tudo (Reset)</button>
+        <br><br>
+        <button onclick="fecharModal()" style="background:#555">Cancelar</button>
+    </div>
+
+    <script>
+        // --- LÓGICA DO TOQUE DUPLO ---
+        let ultimoToque = 0;
+        let timerToque;
+        const area = document.getElementById('zona-toque');
+
+        area.addEventListener('click', (e) => {
+            const agora = new Date().getTime();
+            const diferenca = agora - ultimoToque;
+
+            // Se o segundo toque acontecer em menos de 300ms, é duplo
+            if (diferenca < 300 && diferenca > 0) {
+                clearTimeout(timerToque); // Cancela o comando de toque simples
+                enviarComando('anterior');
+            } else {
+                // Espera 300ms. Se não houver outro toque, executa o simples.
+                timerToque = setTimeout(() => {
+                    enviarComando('proximo');
+                }, 300);
+            }
+            ultimoToque = agora;
+        });
+
+        // --- COMUNICAÇÃO COM O SERVIDOR ---
+        async function enviarComando(tipoAcao) {
+            const valorInput = document.getElementById('input-manual').value;
+
+            try {
+                const resposta = await fetch('/api/comando', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        acao: tipoAcao,
+                        valorManual: valorInput
+                    })
+                });
+
+                const dados = await resposta.json();
+
+                // Atualiza o número na tela do celular também
+                document.getElementById('num-tela').innerText = dados.numeroAtual;
+
+                // Se estava com modal aberto, fecha
+                fecharModal();
+
+            } catch (erro) {
+                alert("Erro ao comunicar com o servidor. Verifique o Wi-Fi.");
+            }
+        }
+
+        // Busca o número atual assim que abre a página
+        async function carregarInicial() {
+            const r = await fetch('/api/status');
+            const d = await r.json();
+            document.getElementById('num-tela').innerText = d.numeroAtual;
+        }
+        carregarInicial(); // Executa ao abrir
+
+        // Funções do Modal
+        function abrirModal() { document.getElementById('modal-opcoes').style.display = 'flex'; }
+        function fecharModal() { document.getElementById('modal-opcoes').style.display = 'none'; }
+
+    </script>
+</body>
+
+</html>

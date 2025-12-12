@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Painel TV</title>
+    <style>
+        /* CSS Básico para deixar bonito e centralizado */
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            height: 100vh;
+            /* Altura total da tela */
+            display: flex;
+            flex-direction: column;
+            background-color: #f4f4f4;
+            overflow: hidden;
+            /* Sem barras de rolagem */
+        }
+
+        /* Parte de Cima: Senha Gigante */
+        .area-senha {
+            flex: 3;
+            /* Ocupa 75% da tela */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: white;
+            flex-direction: column;
+        }
+
+        h1 {
+            font-size: 3rem;
+            color: #555;
+            margin-bottom: 0;
+            text-transform: uppercase;
+        }
+
+        .numero {
+            font-size: 25rem;
+            font-weight: bold;
+            color: #0056b3;
+            line-height: 1;
+        }
+
+        /* Parte de Baixo: Histórico */
+        .area-historico {
+            flex: 1;
+            /* Ocupa 25% da tela */
+            background-color: #0056b3;
+            color: white;
+            display: flex;
+            align-items: center;
+            padding-left: 50px;
+            gap: 30px;
+            /* Espaço entre itens */
+        }
+
+        .titulo-hist {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-right: 20px;
+        }
+
+        .item-hist {
+            font-size: 3rem;
+            opacity: 0.7;
+        }
+
+        /* Botão invisível para iniciar o áudio (política de navegadores) */
+        #btn-iniciar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 30px;
+            cursor: pointer;
+            z-index: 999;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Bloqueio inicial para liberar o som -->
+    <div id="btn-iniciar" onclick="iniciarSistema()">
+        <div>Clique na tela para INICIAR O PAINEL</div>
+    </div>
+
+    <!-- Elemento de som invisível -->
+    <audio id="audio-ding" src="ding.mp3"></audio>
+
+    <div class="area-senha">
+        <h1>Senha Atual</h1>
+        <div id="display-numero" class="numero">---</div>
+    </div>
+
+    <div class="area-historico">
+        <div class="titulo-hist">Anteriores:</div>
+        <div id="lista-historico" style="display:flex; gap:30px;">
+            <!-- O Javascript vai preencher isso aqui -->
+        </div>
+    </div>
+
+    <script>
+        // Variável para lembrar quando foi a última atualização
+        let ultimaAtualizacao = 0;
+
+        function iniciarSistema() {
+            // Esconde a tela preta
+            document.getElementById('btn-iniciar').style.display = 'none';
+            // Prepara o áudio (hack para liberar som no Chrome/TVs)
+            document.getElementById('audio-ding').play().catch(e => { });
+
+            // Inicia o "Polling" (verificação a cada 1 segundo)
+            setInterval(verificarStatus, 1000);
+        }
+
+        async function verificarStatus() {
+            try {
+                // Faz a requisição ao servidor
+                const resposta = await fetch('/api/status');
+                const dados = await resposta.json();
+
+                // Atualiza o número na tela
+                document.getElementById('display-numero').innerText = dados.numeroAtual;
+
+                // Atualiza o histórico
+                const divHistorico = document.getElementById('lista-historico');
+                divHistorico.innerHTML = ''; // Limpa antes de redesenhar
+
+                dados.historico.forEach(num => {
+                    const span = document.createElement('span');
+                    span.className = 'item-hist';
+                    span.innerText = num;
+                    divHistorico.appendChild(span);
+                });
+
+                // Lógica do Som: Se o timestamp do servidor for maior que o que eu tenho guardado
+                if (dados.timestamp > ultimaAtualizacao) {
+                    // Evita tocar som na primeira vez que abre a página (se ultimaAtualizacao for 0)
+                    if (ultimaAtualizacao !== 0) {
+                        tocarSom();
+                    }
+                    ultimaAtualizacao = dados.timestamp;
+                }
+
+            } catch (erro) {
+                console.error("Erro ao conectar no servidor", erro);
+            }
+        }
+
+        function tocarSom() {
+            const audio = document.getElementById('audio-ding');
+            audio.currentTime = 0; // Reinicia o som do começo
+            audio.play();
+        }
+    </script>
+</body>
+
+</html>
