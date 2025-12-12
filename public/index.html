@@ -3,163 +3,294 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Painel TV</title>
+    <title>Painel CREOI</title>
     <style>
-        /* CSS Básico para deixar bonito e centralizado */
+        /* --- CONFIGURAÇÕES GERAIS --- */
         body {
             margin: 0;
-            font-family: Arial, sans-serif;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             height: 100vh;
-            /* Altura total da tela */
             display: flex;
             flex-direction: column;
-            background-color: #f4f4f4;
+            /* Fundo cinza médio para reduzir brilho excessivo na TV */
+            background-color: #dcdcdc;
             overflow: hidden;
-            /* Sem barras de rolagem */
         }
 
-        /* Parte de Cima: Senha Gigante */
-        .area-senha {
-            flex: 3;
-            /* Ocupa 75% da tela */
+        /* --- CABEÇALHO (Camuflagem com a TV) --- */
+        header {
+            /* Cor escura igual à barra do navegador da foto */
+            background-color: #2b2b2b;
+            color: #f0f0f0;
+            /* Branco levemente acinzentado */
+            height: 14vh;
+            /* Um pouco mais alto para caber o texto maior */
             display: flex;
-            justify-content: center;
             align-items: center;
-            background-color: white;
+            justify-content: space-between;
+            padding: 0 40px;
+            /* Removemos sombra para parecer plano com o navegador */
+            border-bottom: 4px solid #0056b3;
+            /* Uma linha fina azul para manter a identidade */
+        }
+
+        .logo-area {
+            display: flex;
             flex-direction: column;
+            justify-content: center;
         }
 
-        h1 {
-            font-size: 3rem;
-            color: #555;
-            margin-bottom: 0;
-            text-transform: uppercase;
-        }
-
-        .numero {
-            font-size: 25rem;
-            font-weight: bold;
-            color: #0056b3;
+        .logo-area h1 {
+            margin: 0;
+            font-size: 5vh;
+            /* CREOI bem grande */
+            font-weight: 800;
+            letter-spacing: 3px;
             line-height: 1;
         }
 
-        /* Parte de Baixo: Histórico */
-        .area-historico {
+        .logo-area p {
+            margin: 5px 0 0 0;
+            font-size: 2.8vh;
+            /* Aumentado conforme pedido */
+            opacity: 0.9;
+            font-weight: 400;
+        }
+
+        /* Relógio estilo digital clean */
+        .relogio {
+            font-size: 4vh;
+            font-weight: bold;
+            background: #1a1a1a;
+            color: #00bcd4;
+            /* Um azul ciano para destaque digital */
+            padding: 5px 25px;
+            border-radius: 8px;
+            border: 1px solid #444;
+        }
+
+        /* --- CORPO PRINCIPAL --- */
+        main {
             flex: 1;
-            /* Ocupa 25% da tela */
-            background-color: #0056b3;
-            color: white;
             display: flex;
+            padding: 20px;
+            gap: 20px;
+        }
+
+        /* SENHA ATUAL */
+        .painel-principal {
+            flex: 2;
+            /* 66% da tela */
+            background-color: white;
+            /* Fundo branco para contraste máximo no número */
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
             align-items: center;
-            padding-left: 50px;
-            gap: 30px;
-            /* Espaço entre itens */
+            box-shadow: 4px 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .titulo-senha {
+            font-size: 4vw;
+            color: #444;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            margin-bottom: -20px;
+            /* Puxa o número pra cima um pouco */
+        }
+
+        .numero-gigante {
+            font-size: 38vh;
+            /* Ainda maior */
+            font-weight: bold;
+            color: #222;
+            /* Preto quase puro para leitura fácil */
+            font-variant-numeric: tabular-nums;
+            /* Evita que o número "pule" quando muda */
+        }
+
+        /* HISTÓRICO */
+        .painel-lateral {
+            flex: 1;
+            /* 33% da tela */
+            background-color: #e8e8e8;
+            /* Levemente mais escuro que o branco */
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #ccc;
         }
 
         .titulo-hist {
-            font-size: 2rem;
+            font-size: 3vh;
+            color: #333;
             font-weight: bold;
-            margin-right: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #999;
+            padding-bottom: 10px;
         }
 
-        .item-hist {
-            font-size: 3rem;
-            opacity: 0.7;
+        #lista-historico {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
         }
 
-        /* Botão invisível para iniciar o áudio (política de navegadores) */
-        #btn-iniciar {
+        /* Item do Histórico (Número + Hora) */
+        .card-hist {
+            background-color: white;
+            color: #555;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+
+            /* Layout interno do card */
+            display: flex;
+            justify-content: space-between;
+            /* Número na esq, Hora na dir */
+            align-items: center;
+        }
+
+        .hist-num {
+            font-size: 5vh;
+            font-weight: bold;
+            color: #0056b3;
+        }
+
+        .hist-hora {
+            font-size: 3vh;
+            color: #888;
+        }
+
+        /* Primeiro item do histórico em destaque */
+        .card-hist:first-child {
+            border-left: 5px solid #0056b3;
+            background-color: #fff;
+        }
+
+        /* --- TELA DE INÍCIO --- */
+        #bloqueio-som {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
+            background: rgba(43, 43, 43, 0.98);
+            /* Fundo escuro igual header */
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 30px;
-            cursor: pointer;
+            flex-direction: column;
+            color: white;
             z-index: 999;
+            cursor: pointer;
         }
     </style>
 </head>
 
 <body>
 
-    <!-- Bloqueio inicial para liberar o som -->
-    <div id="btn-iniciar" onclick="iniciarSistema()">
-        <div>Clique na tela para INICIAR O PAINEL</div>
+    <div id="bloqueio-som" onclick="liberarSistema()">
+        <h1 style="font-size: 5vh">CREOI - Iniciar Painel</h1>
+        <p style="font-size: 3vh">Toque aqui para começar</p>
     </div>
 
-    <!-- Elemento de som invisível -->
-    <audio id="audio-ding" src="ding.mp3"></audio>
+    <audio id="som-chamada" src="ding.mp3"></audio>
 
-    <div class="area-senha">
-        <h1>Senha Atual</h1>
-        <div id="display-numero" class="numero">---</div>
-    </div>
-
-    <div class="area-historico">
-        <div class="titulo-hist">Anteriores:</div>
-        <div id="lista-historico" style="display:flex; gap:30px;">
-            <!-- O Javascript vai preencher isso aqui -->
+    <header>
+        <div class="logo-area">
+            <h1>CREOI</h1>
+            <p>Centro de Referência em Oftalmologia de Iguatama</p>
         </div>
-    </div>
+        <div class="relogio" id="relogio">--:--</div>
+    </header>
+
+    <main>
+        <section class="painel-principal">
+            <div class="titulo-senha">Senha</div>
+            <!-- Exibe 000 por padrão -->
+            <div id="display-atual" class="numero-gigante">000</div>
+        </section>
+
+        <aside class="painel-lateral">
+            <div class="titulo-hist">Anteriores</div>
+            <div id="lista-historico">
+                <!-- Preenchido via JS -->
+            </div>
+        </aside>
+    </main>
 
     <script>
-        // Variável para lembrar quando foi a última atualização
-        let ultimaAtualizacao = 0;
+        let ultimoTimestamp = 0;
 
-        function iniciarSistema() {
-            // Esconde a tela preta
-            document.getElementById('btn-iniciar').style.display = 'none';
-            // Prepara o áudio (hack para liberar som no Chrome/TVs)
-            document.getElementById('audio-ding').play().catch(e => { });
-
-            // Inicia o "Polling" (verificação a cada 1 segundo)
-            setInterval(verificarStatus, 1000);
+        // Função formatadora: Transforma 5 em "005"
+        function formatarSenha(num) {
+            return String(num).padStart(3, '0');
         }
 
-        async function verificarStatus() {
+        function liberarSistema() {
+            const audio = document.getElementById('som-chamada');
+            audio.volume = 0.1;
+            audio.play().then(() => {
+                audio.pause(); audio.currentTime = 0; audio.volume = 1.0;
+                document.getElementById('bloqueio-som').style.display = 'none';
+                iniciarLoop();
+            }).catch(e => alert("Toque novamente!"));
+        }
+
+        function iniciarLoop() {
+            setInterval(buscarDados, 1000);
+            setInterval(atualizarRelogio, 1000);
+        }
+
+        async function buscarDados() {
             try {
-                // Faz a requisição ao servidor
-                const resposta = await fetch('/api/status');
-                const dados = await resposta.json();
+                const req = await fetch('/api/status');
+                const dados = await req.json();
 
-                // Atualiza o número na tela
-                document.getElementById('display-numero').innerText = dados.numeroAtual;
+                // 1. Atualiza Senha Principal (com formatação 000)
+                document.getElementById('display-atual').innerText = formatarSenha(dados.numeroAtual);
 
-                // Atualiza o histórico
-                const divHistorico = document.getElementById('lista-historico');
-                divHistorico.innerHTML = ''; // Limpa antes de redesenhar
+                // 2. Atualiza Histórico
+                const containerHist = document.getElementById('lista-historico');
+                containerHist.innerHTML = '';
 
-                dados.historico.forEach(num => {
-                    const span = document.createElement('span');
-                    span.className = 'item-hist';
-                    span.innerText = num;
-                    divHistorico.appendChild(span);
+                // Agora "item" é um objeto {numero, hora}
+                dados.historico.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'card-hist';
+
+                    // Monta o HTML: Numero à esquerda, Hora à direita
+                    div.innerHTML = `
+                        <span class="hist-num">${formatarSenha(item.numero)}</span>
+                        <span class="hist-hora">${item.hora}</span>
+                    `;
+                    containerHist.appendChild(div);
                 });
 
-                // Lógica do Som: Se o timestamp do servidor for maior que o que eu tenho guardado
-                if (dados.timestamp > ultimaAtualizacao) {
-                    // Evita tocar som na primeira vez que abre a página (se ultimaAtualizacao for 0)
-                    if (ultimaAtualizacao !== 0) {
-                        tocarSom();
-                    }
-                    ultimaAtualizacao = dados.timestamp;
+                // 3. Som
+                if (dados.timestamp > ultimoTimestamp) {
+                    if (ultimoTimestamp !== 0) tocarSom();
+                    ultimoTimestamp = dados.timestamp;
                 }
-
-            } catch (erro) {
-                console.error("Erro ao conectar no servidor", erro);
-            }
+            } catch (e) { console.error("Conexão perdida"); }
         }
 
         function tocarSom() {
-            const audio = document.getElementById('audio-ding');
-            audio.currentTime = 0; // Reinicia o som do começo
-            audio.play();
+            const audio = document.getElementById('som-chamada');
+            audio.currentTime = 0;
+            audio.play().catch(e => console.log(e));
+        }
+
+        function atualizarRelogio() {
+            const agora = new Date();
+            const hora = String(agora.getHours()).padStart(2, '0');
+            const min = String(agora.getMinutes()).padStart(2, '0');
+            document.getElementById('relogio').innerText = `${hora}:${min}`;
         }
     </script>
 </body>
