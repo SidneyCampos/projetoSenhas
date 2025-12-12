@@ -6,10 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Controle Recepção</title>
     <style>
-        /* Estilo escuro para não cansar a vista */
+        /* --- ESTILO GERAL --- */
         body {
             margin: 0;
-            font-family: sans-serif;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #222;
             color: white;
             height: 100vh;
@@ -18,40 +19,91 @@
             overflow: hidden;
         }
 
-        /* Área de Toque Principal */
-        #zona-toque {
+        /* 1. VISOR DO NÚMERO ATUAL */
+        .visor {
             flex: 1;
-            /* Ocupa todo o espaço disponível */
+            /* Ocupa um espaço pequeno no topo */
+            background-color: #333;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            background: linear-gradient(135deg, #0056b3, #004494);
-            cursor: pointer;
-            user-select: none;
-            /* Impede selecionar texto */
-            -webkit-tap-highlight-color: transparent;
-            /* Remove piscada azul no mobile */
+            border-bottom: 2px solid #555;
+            padding: 10px;
         }
 
-        /* Efeito visual ao clicar */
-        #zona-toque:active {
-            opacity: 0.9;
-            transform: scale(0.98);
+        .visor h2 {
+            margin: 0;
+            font-size: 16px;
+            opacity: 0.7;
+            text-transform: uppercase;
         }
 
-        .texto-grande {
-            font-size: 80px;
+        .visor .numero-atual {
+            font-size: 60px;
             font-weight: bold;
+            color: #fff;
+            line-height: 1;
         }
 
-        .instrucao {
-            margin-top: 10px;
-            font-size: 14px;
-            opacity: 0.8;
+        /* 2. ÁREA DOS BOTÕES PRINCIPAIS */
+        .botoes-area {
+            flex: 3;
+            /* Ocupa a maior parte da tela */
+            display: flex;
+            flex-direction: column;
+            /* Botões um em cima do outro */
+            padding: 15px;
+            gap: 15px;
         }
 
-        /* Barra de Ferramentas Inferior */
+        /* Botão PRÓXIMO (O Principal) */
+        .btn-proximo {
+            flex: 2;
+            /* Ocupa 2x mais espaço que o voltar */
+            background-color: #28a745;
+            /* Verde Sucesso */
+            border: none;
+            border-radius: 15px;
+            color: white;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #1e7e34;
+            /* Efeito 3D */
+            transition: transform 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-proximo:active {
+            transform: translateY(4px);
+            box-shadow: 0 1px 0 #1e7e34;
+        }
+
+        /* Botão VOLTAR (Correção) */
+        .btn-voltar {
+            flex: 1;
+            /* Menor */
+            background-color: #d39e00;
+            /* Laranja/Amarelo Escuro */
+            border: none;
+            border-radius: 15px;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #9c7500;
+        }
+
+        .btn-voltar:active {
+            transform: translateY(4px);
+            box-shadow: 0 1px 0 #9c7500;
+        }
+
+
+        /* 3. RODAPÉ (OPÇÕES) */
         .barra-opcoes {
             height: 60px;
             background-color: #111;
@@ -61,7 +113,7 @@
             border-top: 1px solid #444;
         }
 
-        button {
+        .btn-config {
             padding: 10px 20px;
             font-size: 16px;
             border-radius: 5px;
@@ -71,10 +123,9 @@
             color: white;
         }
 
-        /* Menu de Opções (Modal) */
+        /* MODAL (CONFIGURAÇÕES) */
         #modal-opcoes {
             display: none;
-            /* Começa escondido */
             position: fixed;
             top: 0;
             left: 0;
@@ -94,55 +145,60 @@
             text-align: center;
             width: 100px;
         }
+
+        .btn-modal {
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            margin-bottom: 5px;
+        }
     </style>
 </head>
 
 <body>
 
-    <!-- Área Gigante de Toque -->
-    <div id="zona-toque">
-        <div id="num-tela" class="texto-grande">---</div>
-        <div class="instrucao">1 Toque: Próximo | 2 Toques: Voltar</div>
+    <!-- Visor -->
+    <div class="visor">
+        <h2>Senha Atual</h2>
+        <div class="numero-atual" id="num-tela">---</div>
     </div>
 
-    <!-- Botão Pequeno Embaixo -->
+    <!-- Botões de Ação -->
+    <div class="botoes-area">
+        <button class="btn-proximo" onclick="enviarComando('proximo')">
+            PRÓXIMO ➔
+        </button>
+
+        <button class="btn-voltar" onclick="enviarComando('anterior')">
+            🠔 Voltar (Corrigir)
+        </button>
+    </div>
+
+    <!-- Rodapé -->
     <div class="barra-opcoes">
-        <button onclick="abrirModal()">⚙️ Opções</button>
+        <button class="btn-config" onclick="abrirModal()">⚙️ Opções / Reset</button>
     </div>
 
-    <!-- Modal de Configuração -->
+    <!-- Modal (Escondido) -->
     <div id="modal-opcoes">
-        <h3>Ajuste Manual</h3>
-        <input type="number" id="input-manual" placeholder="123">
-        <button onclick="enviarComando('definir')" style="background:#0056b3">Definir Número</button>
+        <h3 style="color:white">Ajuste Manual</h3>
+        <input type="number" id="input-manual" placeholder="Nº">
+        <button class="btn-modal" onclick="enviarComando('definir')" style="background:#0056b3">Definir Número</button>
         <br>
-        <button onclick="enviarComando('reset')" style="background:#b30000">Zerar Tudo (Reset)</button>
+        <button class="btn-modal" onclick="enviarComando('reset')" style="background:#b30000">Zerar Tudo
+            (Reset)</button>
         <br><br>
-        <button onclick="fecharModal()" style="background:#555">Cancelar</button>
+        <button class="btn-modal" onclick="fecharModal()" style="background:#555">Cancelar</button>
     </div>
 
     <script>
-        // --- LÓGICA DO TOQUE DUPLO ---
-        let ultimoToque = 0;
-        let timerToque;
-        const area = document.getElementById('zona-toque');
-
-        area.addEventListener('click', (e) => {
-            const agora = new Date().getTime();
-            const diferenca = agora - ultimoToque;
-
-            // Se o segundo toque acontecer em menos de 300ms, é duplo
-            if (diferenca < 300 && diferenca > 0) {
-                clearTimeout(timerToque); // Cancela o comando de toque simples
-                enviarComando('anterior');
-            } else {
-                // Espera 300ms. Se não houver outro toque, executa o simples.
-                timerToque = setTimeout(() => {
-                    enviarComando('proximo');
-                }, 300);
-            }
-            ultimoToque = agora;
-        });
+        // Função para formatar o número com 3 dígitos (ex: 005)
+        function formatar(num) {
+            return String(num).padStart(3, '0');
+        }
 
         // --- COMUNICAÇÃO COM O SERVIDOR ---
         async function enviarComando(tipoAcao) {
@@ -160,23 +216,33 @@
 
                 const dados = await resposta.json();
 
-                // Atualiza o número na tela do celular também
-                document.getElementById('num-tela').innerText = dados.numeroAtual;
+                // Atualiza o visor local
+                document.getElementById('num-tela').innerText = formatar(dados.numeroAtual);
 
-                // Se estava com modal aberto, fecha
-                fecharModal();
+                // Fecha modal se estiver aberto
+                if (tipoAcao === 'definir' || tipoAcao === 'reset') {
+                    fecharModal();
+                    document.getElementById('input-manual').value = '';
+                }
 
             } catch (erro) {
                 alert("Erro ao comunicar com o servidor. Verifique o Wi-Fi.");
             }
         }
 
-        // Busca o número atual assim que abre a página
+        // Busca o número atual assim que abre a página para sincronizar
         async function carregarInicial() {
-            const r = await fetch('/api/status');
-            const d = await r.json();
-            document.getElementById('num-tela').innerText = d.numeroAtual;
+            try {
+                const r = await fetch('/api/status');
+                const d = await r.json();
+                document.getElementById('num-tela').innerText = formatar(d.numeroAtual);
+            } catch (e) { }
         }
+
+        // Loop para manter o celular da recepcionista atualizado 
+        // caso outra pessoa mude a senha em outro computador
+        setInterval(carregarInicial, 2000);
+
         carregarInicial(); // Executa ao abrir
 
         // Funções do Modal
